@@ -1,8 +1,10 @@
-import Groq from 'groq-sdk'
+let groq = null
 
-const groq = process.env.GROQ_API_KEY
-  ? new Groq({ apiKey: process.env.GROQ_API_KEY })
-  : null
+// Only initialize Groq client if API key is available
+if (process.env.GROQ_API_KEY) {
+  const Groq = require('groq-sdk').default
+  groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+}
 
 const SYSTEM_PROMPT = `You are a helpful, friendly AI assistant. You provide clear, accurate, and thoughtful responses to help users with their questions and tasks.
 

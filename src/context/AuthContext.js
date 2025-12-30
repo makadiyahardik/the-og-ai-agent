@@ -19,6 +19,12 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Check if supabase is configured
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
     // Check active sessions and sets the user
     const getSession = async () => {
       try {
@@ -49,6 +55,9 @@ export function AuthProvider({ children }) {
 
   // Sign up with email and password
   const signUp = async (email, password, fullName) => {
+    if (!supabase) {
+      return { data: null, error: { message: 'Authentication not configured' } };
+    }
     try {
       setError(null);
       const { data, error } = await supabase.auth.signUp({
@@ -70,6 +79,9 @@ export function AuthProvider({ children }) {
 
   // Sign in with email and password
   const signIn = async (email, password) => {
+    if (!supabase) {
+      return { data: null, error: { message: 'Authentication not configured' } };
+    }
     try {
       setError(null);
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -86,6 +98,7 @@ export function AuthProvider({ children }) {
 
   // Sign out
   const signOut = async () => {
+    if (!supabase) return;
     try {
       setError(null);
       const { error } = await supabase.auth.signOut();
@@ -98,6 +111,9 @@ export function AuthProvider({ children }) {
 
   // Reset password
   const resetPassword = async (email) => {
+    if (!supabase) {
+      return { data: null, error: { message: 'Authentication not configured' } };
+    }
     try {
       setError(null);
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -113,6 +129,9 @@ export function AuthProvider({ children }) {
 
   // Update password
   const updatePassword = async (newPassword) => {
+    if (!supabase) {
+      return { data: null, error: { message: 'Authentication not configured' } };
+    }
     try {
       setError(null);
       const { data, error } = await supabase.auth.updateUser({
