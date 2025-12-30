@@ -90,7 +90,7 @@ export default function SignUpPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.push('/');
+      router.push('/dashboard');
     }
   }, [user, loading, router]);
 
@@ -136,7 +136,7 @@ export default function SignUpPage() {
     } else {
       // If we got a session, user is logged in (email confirmation disabled)
       if (data?.session) {
-        router.push('/');
+        router.push('/dashboard');
       } else {
         // Email confirmation is required
         setIsSignupComplete(true);
@@ -161,7 +161,7 @@ export default function SignUpPage() {
           {/* Logo */}
           <div className="flex items-center justify-center gap-3 text-[#10a37f]">
             <SparklesIcon />
-            <span className="text-2xl font-semibold text-white">AI Assistant</span>
+            <span className="text-2xl font-semibold text-white">NexusAI</span>
           </div>
 
           {/* Success Icon */}
@@ -241,7 +241,7 @@ export default function SignUpPage() {
         <div className="relative z-10">
           <div className="flex items-center gap-3 text-white">
             <SparklesIcon />
-            <span className="text-2xl font-semibold">AI Assistant</span>
+            <span className="text-2xl font-semibold">NexusAI</span>
           </div>
         </div>
 
@@ -292,7 +292,7 @@ export default function SignUpPage() {
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center gap-3 text-[#10a37f] mb-4">
             <SparklesIcon />
-            <span className="text-2xl font-semibold text-white">AI Assistant</span>
+            <span className="text-2xl font-semibold text-white">NexusAI</span>
           </div>
 
           <div className="text-center">

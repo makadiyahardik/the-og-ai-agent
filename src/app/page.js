@@ -1,722 +1,805 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
-import AuthGuard from '@/components/AuthGuard'
-import ReactMarkdown from 'react-markdown'
 
-// Icons as components for cleaner code
+// Icons
 const Icons = {
-  Menu: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
-  ),
-  Plus: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-    </svg>
-  ),
-  Image: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-    </svg>
-  ),
-  Download: () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-    </svg>
-  ),
-  Send: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19V5m0 0l-7 7m7-7l7 7" />
-    </svg>
-  ),
-  Copy: () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-    </svg>
-  ),
-  Check: () => (
-    <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-    </svg>
-  ),
-  Trash: () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-    </svg>
-  ),
-  Chat: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-    </svg>
-  ),
-  Sparkles: () => (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  Sparkles: ({ className = "w-6 h-6" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
     </svg>
   ),
-  ChevronDown: () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+  Chat: ({ className = "w-6 h-6" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
     </svg>
   ),
-  Close: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  Image: ({ className = "w-6 h-6" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  ),
+  Code: ({ className = "w-6 h-6" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+    </svg>
+  ),
+  Zap: ({ className = "w-6 h-6" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+    </svg>
+  ),
+  Shield: ({ className = "w-6 h-6" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+    </svg>
+  ),
+  Globe: ({ className = "w-6 h-6" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+    </svg>
+  ),
+  Check: ({ className = "w-5 h-5" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    </svg>
+  ),
+  ArrowRight: ({ className = "w-5 h-5" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+    </svg>
+  ),
+  Menu: ({ className = "w-6 h-6" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  ),
+  Close: ({ className = "w-6 h-6" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
     </svg>
   ),
-  User: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+  Users: ({ className = "w-6 h-6" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
     </svg>
   ),
-  Logout: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-    </svg>
-  ),
-  Settings: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+  TrendingUp: ({ className = "w-6 h-6" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
     </svg>
   ),
 }
 
-// Generate unique ID
-const generateId = () => Math.random().toString(36).substring(2, 15)
+// Pricing data with usage-based model for UnitPay
+const pricingPlans = [
+  {
+    name: 'Starter',
+    description: 'Perfect for trying out the platform',
+    price: 0,
+    priceLabel: 'Free',
+    period: 'forever',
+    highlight: false,
+    features: [
+      '100 chat messages / month',
+      '10 image generations / month',
+      'Basic AI models',
+      'Email support',
+      'Community access',
+    ],
+    limits: {
+      chatMessages: 100,
+      imageGenerations: 10,
+    },
+    cta: 'Get Started Free',
+    ctaLink: '/auth/signup',
+  },
+  {
+    name: 'Pro',
+    description: 'For professionals who need more power',
+    price: 29,
+    priceLabel: '$29',
+    period: '/month',
+    highlight: true,
+    popular: true,
+    features: [
+      '2,000 chat messages / month',
+      '200 image generations / month',
+      'Advanced AI models (GPT-4, Claude)',
+      'Priority support',
+      'API access',
+      'Usage-based overage pricing:',
+    ],
+    usageRates: [
+      { label: 'Extra chat messages', rate: '$0.002/msg' },
+      { label: 'Extra image generations', rate: '$0.02/img' },
+    ],
+    limits: {
+      chatMessages: 2000,
+      imageGenerations: 200,
+    },
+    cta: 'Start Pro Trial',
+    ctaLink: '/auth/signup?plan=pro',
+  },
+  {
+    name: 'Team',
+    description: 'For teams building AI-powered products',
+    price: 99,
+    priceLabel: '$99',
+    period: '/month',
+    highlight: false,
+    features: [
+      '10,000 chat messages / month',
+      '1,000 image generations / month',
+      'All AI models + early access',
+      'Dedicated account manager',
+      'Team collaboration tools',
+      'Volume discount pricing:',
+    ],
+    usageRates: [
+      { label: 'Extra chat messages', rate: '$0.001/msg' },
+      { label: 'Extra image generations', rate: '$0.015/img' },
+    ],
+    limits: {
+      chatMessages: 10000,
+      imageGenerations: 1000,
+    },
+    cta: 'Contact Sales',
+    ctaLink: '/auth/signup?plan=team',
+  },
+]
 
-function HomeContent() {
-  const { user, signOut } = useAuth()
-  const [messages, setMessages] = useState([])
-  const [input, setInput] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [conversations, setConversations] = useState([])
-  const [currentConversationId, setCurrentConversationId] = useState(null)
-  const [copiedId, setCopiedId] = useState(null)
-  const [mode, setMode] = useState('chat') // 'chat' or 'image'
-  const [modeMenuOpen, setModeMenuOpen] = useState(false)
-  const [userMenuOpen, setUserMenuOpen] = useState(false)
+const features = [
+  {
+    icon: Icons.Chat,
+    title: 'AI Chat Assistant',
+    description: 'Get instant answers, brainstorm ideas, and solve complex problems with our advanced AI chat.',
+  },
+  {
+    icon: Icons.Image,
+    title: 'Image Generation',
+    description: 'Create stunning images from text descriptions using state-of-the-art AI models.',
+  },
+  {
+    icon: Icons.Code,
+    title: 'Code Assistant',
+    description: 'Debug code, generate solutions, and learn new programming concepts with AI help.',
+  },
+  {
+    icon: Icons.Zap,
+    title: 'Lightning Fast',
+    description: 'Get responses in seconds with our optimized infrastructure and model selection.',
+  },
+  {
+    icon: Icons.Shield,
+    title: 'Secure & Private',
+    description: 'Your data is encrypted and never used to train models. Enterprise-grade security.',
+  },
+  {
+    icon: Icons.Globe,
+    title: 'Available Everywhere',
+    description: 'Access from any device, anywhere. Works on web, mobile, and desktop.',
+  },
+]
 
-  const messagesEndRef = useRef(null)
-  const textareaRef = useRef(null)
-  const inputContainerRef = useRef(null)
-  const modeMenuRef = useRef(null)
-  const userMenuRef = useRef(null)
+const faqs = [
+  {
+    question: 'How does usage-based pricing work?',
+    answer: 'Each plan includes a base amount of messages and image generations. If you exceed your limits, you pay a small per-use fee. This ensures you only pay for what you use, with predictable base costs.',
+  },
+  {
+    question: 'Can I upgrade or downgrade my plan?',
+    answer: 'Yes! You can change your plan at any time. When upgrading, you get immediate access to new features. When downgrading, the change takes effect at the end of your billing cycle.',
+  },
+  {
+    question: 'What AI models do you use?',
+    answer: 'We use a combination of leading AI models including Llama 3.3, GPT-4, and Claude for chat, and Flux, Stable Diffusion, and Imagen for image generation. Pro and Team plans get access to the most advanced models.',
+  },
+  {
+    question: 'Is my data secure?',
+    answer: 'Your conversations and generated content are encrypted and stored securely. We never use your data to train AI models, and you can delete your data at any time.',
+  },
+  {
+    question: 'Do you offer enterprise plans?',
+    answer: 'Yes! For organizations with specific needs, we offer custom enterprise plans with dedicated support, custom integrations, SLA guarantees, and volume pricing. Contact us for details.',
+  },
+]
 
-  // Get user display info
-  const userDisplayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
-  const userEmail = user?.email || ''
-  const userInitials = userDisplayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+// Demo scenarios for the interactive demo
+const demoScenarios = [
+  {
+    type: 'image',
+    userMessage: 'Create a futuristic city skyline at sunset',
+    aiResponse: "Here's your futuristic city skyline at sunset:",
+    gradient: 'from-purple-900/50 via-pink-900/50 to-orange-900/50',
+  },
+  {
+    type: 'chat',
+    userMessage: 'Explain quantum computing in simple terms',
+    aiResponse: "Quantum computing uses quantum bits (qubits) that can exist in multiple states simultaneously, unlike classical bits. This allows quantum computers to process many possibilities at once, making them incredibly powerful for specific tasks like cryptography, drug discovery, and optimization problems.",
+  },
+  {
+    type: 'image',
+    userMessage: 'A magical forest with glowing mushrooms',
+    aiResponse: "Here's your magical forest:",
+    gradient: 'from-emerald-900/50 via-teal-900/50 to-cyan-900/50',
+  },
+  {
+    type: 'chat',
+    userMessage: 'Write a haiku about coding',
+    aiResponse: "Lines of logic flow\nBugs hide in the syntax deep\nCoffee fuels the fix",
+  },
+  {
+    type: 'image',
+    userMessage: 'An astronaut playing guitar on Mars',
+    aiResponse: "Here's your space musician:",
+    gradient: 'from-red-900/50 via-orange-900/50 to-amber-900/50',
+  },
+]
 
-  // Close menus when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modeMenuRef.current && !modeMenuRef.current.contains(event.target)) {
-        setModeMenuOpen(false)
-      }
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-        setUserMenuOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+// Interactive Demo Component
+function InteractiveDemo() {
+  const [currentScenario, setCurrentScenario] = useState(0)
+  const [displayedUserText, setDisplayedUserText] = useState('')
+  const [displayedAiText, setDisplayedAiText] = useState('')
+  const [phase, setPhase] = useState('typing-user') // 'typing-user' | 'loading' | 'typing-ai' | 'complete'
+  const [isImageLoading, setIsImageLoading] = useState(false)
+
+  const scenario = demoScenarios[currentScenario]
+
+  // Reset and start animation for current scenario
+  const startAnimation = useCallback(() => {
+    setDisplayedUserText('')
+    setDisplayedAiText('')
+    setPhase('typing-user')
+    setIsImageLoading(false)
   }, [])
 
-  // Handle logout
-  const handleLogout = async () => {
-    await signOut()
-    setUserMenuOpen(false)
-  }
-
-  // Auto-scroll to bottom
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [])
-
+  // Type user message
   useEffect(() => {
-    scrollToBottom()
-  }, [messages, scrollToBottom])
+    if (phase !== 'typing-user') return
 
-  // Auto-resize textarea
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 200) + 'px'
-    }
-  }, [input])
-
-  // Load conversations from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('conversations')
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      setConversations(parsed)
-    }
-  }, [])
-
-  // Save conversations to localStorage
-  useEffect(() => {
-    if (conversations.length > 0) {
-      localStorage.setItem('conversations', JSON.stringify(conversations))
-    }
-  }, [conversations])
-
-  // Start new chat
-  const startNewChat = () => {
-    const newId = generateId()
-    setCurrentConversationId(newId)
-    setMessages([])
-    setSidebarOpen(false)
-    setMode('chat') // Reset to chat mode
-  }
-
-  // Load conversation
-  const loadConversation = (conv) => {
-    setCurrentConversationId(conv.id)
-    setMessages(conv.messages)
-    setSidebarOpen(false)
-  }
-
-  // Delete conversation
-  const deleteConversation = (e, convId) => {
-    e.stopPropagation()
-    setConversations(prev => prev.filter(c => c.id !== convId))
-    if (currentConversationId === convId) {
-      setCurrentConversationId(null)
-      setMessages([])
-    }
-  }
-
-  // Copy message to clipboard
-  const copyMessage = async (content, id) => {
-    try {
-      await navigator.clipboard.writeText(content)
-      setCopiedId(id)
-      setTimeout(() => setCopiedId(null), 2000)
-    } catch (err) {
-      console.error('Failed to copy:', err)
-    }
-  }
-
-  // Handle send message
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return
-
-    const userMessage = {
-      id: generateId(),
-      role: 'user',
-      content: input.trim(),
-      timestamp: new Date().toISOString()
-    }
-
-    const newMessages = [...messages, userMessage]
-    setMessages(newMessages)
-    setInput('')
-    setIsLoading(true)
-
-    // Reset textarea height
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
-    }
-
-    try {
-      let data
-
-      if (mode === 'image') {
-        // Direct image generation
-        const res = await fetch('/api/image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: userMessage.content
-          })
-        })
-        data = await res.json()
-
-        if (data.success) {
-          data = {
-            post: `Here's the image I created for "${userMessage.content}":`,
-            isImage: true,
-            imageUrl: data.imageUrl,
-            imagePrompt: data.prompt,
-            model: data.model
-          }
-        } else {
-          data = { error: data.error || 'Failed to generate image' }
+    const text = scenario.userMessage
+    if (displayedUserText.length < text.length) {
+      const timer = setTimeout(() => {
+        setDisplayedUserText(text.slice(0, displayedUserText.length + 1))
+      }, 40)
+      return () => clearTimeout(timer)
+    } else {
+      // Done typing user message, start loading
+      const timer = setTimeout(() => {
+        setPhase('loading')
+        if (scenario.type === 'image') {
+          setIsImageLoading(true)
         }
-      } else {
-        // Regular chat
-        const res = await fetch('/api/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: userMessage.content,
-            messages: newMessages
-          })
-        })
-        data = await res.json()
-      }
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [phase, displayedUserText, scenario])
 
-      const assistantMessage = {
-        id: generateId(),
-        role: 'assistant',
-        content: data.error ? `Error: ${data.error}` : data.post,
-        timestamp: new Date().toISOString(),
-        ...(data.isImage && {
-          isImage: true,
-          imageUrl: data.imageUrl,
-          imagePrompt: data.imagePrompt,
-          model: data.model
-        })
-      }
+  // Loading phase
+  useEffect(() => {
+    if (phase !== 'loading') return
 
-      const updatedMessages = [...newMessages, assistantMessage]
-      setMessages(updatedMessages)
+    const loadTime = scenario.type === 'image' ? 2000 : 800
+    const timer = setTimeout(() => {
+      setPhase('typing-ai')
+      setIsImageLoading(false)
+    }, loadTime)
+    return () => clearTimeout(timer)
+  }, [phase, scenario.type])
 
-      // Save to conversations
-      const convId = currentConversationId || generateId()
-      if (!currentConversationId) {
-        setCurrentConversationId(convId)
-      }
+  // Type AI response
+  useEffect(() => {
+    if (phase !== 'typing-ai') return
 
-      setConversations(prev => {
-        const existingIndex = prev.findIndex(c => c.id === convId)
-        const conversation = {
-          id: convId,
-          title: userMessage.content.substring(0, 30) + (userMessage.content.length > 30 ? '...' : ''),
-          messages: updatedMessages,
-          updatedAt: new Date().toISOString()
-        }
+    const text = scenario.aiResponse
+    if (displayedAiText.length < text.length) {
+      const speed = scenario.type === 'chat' ? 15 : 30
+      const timer = setTimeout(() => {
+        setDisplayedAiText(text.slice(0, displayedAiText.length + 1))
+      }, speed)
+      return () => clearTimeout(timer)
+    } else {
+      setPhase('complete')
+    }
+  }, [phase, displayedAiText, scenario])
 
-        if (existingIndex >= 0) {
-          const updated = [...prev]
-          updated[existingIndex] = conversation
-          return updated
-        }
-        return [conversation, ...prev]
-      })
+  // Auto-advance to next scenario
+  useEffect(() => {
+    if (phase !== 'complete') return
 
-    } catch (error) {
-      const errorMessage = {
-        id: generateId(),
-        role: 'assistant',
-        content: 'Sorry, something went wrong. Please try again.',
-        timestamp: new Date().toISOString()
-      }
-      setMessages(prev => [...prev, errorMessage])
-    } finally {
-      setIsLoading(false)
+    const timer = setTimeout(() => {
+      setCurrentScenario((prev) => (prev + 1) % demoScenarios.length)
+    }, 4000)
+    return () => clearTimeout(timer)
+  }, [phase])
+
+  // Start animation when scenario changes
+  useEffect(() => {
+    startAnimation()
+  }, [currentScenario, startAnimation])
+
+  const handleScenarioClick = (index) => {
+    if (index !== currentScenario) {
+      setCurrentScenario(index)
     }
   }
-
-  // Handle key press
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
-  }
-
-  // Select mode
-  const selectMode = (newMode) => {
-    setMode(newMode)
-    setModeMenuOpen(false)
-  }
-
-  // Suggested prompts based on mode
-  const suggestedPrompts = mode === 'image'
-    ? [
-        "A sunset over mountains with golden light",
-        "A futuristic city at night with neon lights",
-        "A cute robot playing with a cat",
-        "An astronaut riding a horse on Mars"
-      ]
-    : [
-        "Help me write a professional email",
-        "Explain a complex topic simply",
-        "Generate creative ideas for my project",
-        "Help me solve a coding problem"
-      ]
 
   return (
-    <div className="h-screen flex overflow-hidden">
-      {/* Mobile overlay */}
-      <div
-        className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`}
-        onClick={() => setSidebarOpen(false)}
-      />
-
-      {/* Sidebar */}
-      <aside className={`sidebar w-64 h-full flex flex-col ${sidebarOpen ? 'open' : ''}`}>
-        {/* Sidebar Header */}
-        <div className="p-3 border-b border-gray-800">
-          <button
-            onClick={startNewChat}
-            className="w-full flex items-center gap-3 px-3 py-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors text-sm"
-          >
-            <Icons.Plus />
-            <span>New chat</span>
-          </button>
-        </div>
-
-        {/* Conversation List */}
-        <div className="flex-1 overflow-y-auto py-2">
-          {conversations.length === 0 ? (
-            <div className="px-4 py-8 text-center text-gray-500 text-sm">
-              No conversations yet
-            </div>
-          ) : (
-            <div className="space-y-1 px-2">
-              {conversations.map((conv) => (
-                <div
-                  key={conv.id}
-                  onClick={() => loadConversation(conv)}
-                  className={`sidebar-item group flex items-center gap-3 px-3 py-3 rounded-lg cursor-pointer ${
-                    currentConversationId === conv.id ? 'active' : ''
-                  }`}
-                >
-                  <Icons.Chat />
-                  <span className="flex-1 truncate text-sm">{conv.title}</span>
-                  <button
-                    onClick={(e) => deleteConversation(e, conv.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-700 rounded transition-opacity"
-                  >
-                    <Icons.Trash />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Sidebar Footer */}
-        <div className="p-3 border-t border-gray-800">
-          <div className="flex items-center gap-3 px-3 py-2 text-gray-400 text-sm">
-            <Icons.Sparkles />
-            <span>Your Personal AI Assistant</span>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col h-full overflow-hidden">
-        {/* Header */}
-        <header className="flex items-center justify-between px-4 py-3 border-b border-gray-800 bg-[#212121]">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden p-2 hover:bg-gray-800 rounded-lg transition-colors"
-            >
-              <Icons.Menu />
-            </button>
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="hidden md:flex p-2 hover:bg-gray-800 rounded-lg transition-colors"
-            >
-              <Icons.Menu />
-            </button>
-            <h1 className="text-lg font-semibold">Your Personal AI Assistant</h1>
-          </div>
+    <div className="mt-20 relative animate-fade-in">
+      <div className="bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
+        {/* Window Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-black/30">
           <div className="flex items-center gap-2">
-            <button
-              onClick={startNewChat}
-              className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-            >
-              <Icons.Plus />
-            </button>
-
-            {/* User Menu */}
-            <div className="relative" ref={userMenuRef}>
-              <button
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 p-1.5 hover:bg-gray-800 rounded-lg transition-colors"
-              >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#10a37f] to-[#1a7f64] flex items-center justify-center text-sm font-medium">
-                  {userInitials}
-                </div>
-              </button>
-
-              {/* User Dropdown Menu */}
-              {userMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-[#2f2f2f] rounded-xl border border-gray-700 shadow-xl overflow-hidden animate-fade-in z-50">
-                  {/* User Info */}
-                  <div className="px-4 py-3 border-b border-gray-700">
-                    <p className="font-medium text-white truncate">{userDisplayName}</p>
-                    <p className="text-sm text-gray-400 truncate">{userEmail}</p>
-                  </div>
-
-                  {/* Menu Items */}
-                  <div className="p-1">
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-red-400 hover:bg-gray-700/50 rounded-lg transition-colors text-left"
-                    >
-                      <Icons.Logout />
-                      <span>Sign out</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <div className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 transition-colors cursor-pointer"></div>
+            <div className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-400 transition-colors cursor-pointer"></div>
+            <div className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-400 transition-colors cursor-pointer"></div>
           </div>
-        </header>
+          <div className="text-xs text-gray-500">NexusAI Demo</div>
+          <div className="w-16"></div>
+        </div>
 
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto">
-          {messages.length === 0 ? (
-            /* Empty State */
-            <div className="h-full flex flex-col items-center justify-center px-4">
-              <div className="max-w-2xl w-full text-center">
-                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 ${
-                  mode === 'image'
+        {/* Chat Content */}
+        <div className="p-6 sm:p-8 min-h-[320px]">
+          <div className="space-y-6">
+            {/* User message */}
+            <div className="flex justify-end">
+              <div className="bg-[#2f2f2f] rounded-2xl px-4 py-3 max-w-md transform transition-all duration-300">
+                <p className="text-white">
+                  {displayedUserText}
+                  {phase === 'typing-user' && (
+                    <span className="inline-block w-0.5 h-5 bg-white ml-0.5 animate-pulse"></span>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {/* AI response */}
+            {(phase === 'loading' || phase === 'typing-ai' || phase === 'complete') && (
+              <div className="flex items-start gap-3 animate-fade-in">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  scenario.type === 'image'
                     ? 'bg-gradient-to-br from-purple-500 to-pink-500'
                     : 'bg-gradient-to-br from-[#10a37f] to-[#1a7f64]'
                 }`}>
-                  {mode === 'image' ? <Icons.Image /> : <Icons.Sparkles />}
-                </div>
-                <h2 className="text-2xl font-semibold mb-2">
-                  {mode === 'image' ? 'What image shall I create?' : 'How can I help you today?'}
-                </h2>
-                <p className="text-gray-400 mb-8">
-                  {mode === 'image'
-                    ? 'Describe the image you want to generate. Be as detailed as you like!'
-                    : "I'm your personal AI assistant, ready to help with writing, analysis, coding, and more."
-                  }
-                </p>
-
-                {/* Suggested Prompts */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {suggestedPrompts.map((prompt, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setInput(prompt)}
-                      className="p-4 text-left bg-[#2f2f2f] hover:bg-[#3f3f3f] rounded-xl border border-gray-700 transition-colors animate-fade-in"
-                      style={{ animationDelay: `${i * 100}ms` }}
-                    >
-                      <span className="text-sm text-gray-300">{prompt}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* Messages */
-            <div className="max-w-3xl mx-auto w-full px-4 py-6">
-              {messages.map((message, index) => (
-                <div
-                  key={message.id}
-                  className={`mb-6 animate-fade-in ${message.role === 'user' ? 'flex justify-end' : ''}`}
-                  style={{ animationDelay: '0ms' }}
-                >
-                  {message.role === 'user' ? (
-                    /* User Message */
-                    <div className="max-w-[85%] bg-[#2f2f2f] rounded-2xl px-4 py-3">
-                      <p className="text-white whitespace-pre-wrap">{message.content}</p>
-                    </div>
+                  {scenario.type === 'image' ? (
+                    <Icons.Image className="w-4 h-4 text-white" />
                   ) : (
-                    /* Assistant Message */
-                    <div className="group">
-                      <div className="flex items-start gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          message.isImage
-                            ? 'bg-gradient-to-br from-purple-500 to-pink-500'
-                            : 'bg-gradient-to-br from-[#10a37f] to-[#1a7f64]'
-                        }`}>
-                          {message.isImage ? <Icons.Image /> : <Icons.Sparkles />}
+                    <Icons.Sparkles className="w-4 h-4 text-white" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  {/* Loading state */}
+                  {phase === 'loading' && (
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                      </div>
+                      <span className="text-gray-500 text-sm">
+                        {scenario.type === 'image' ? 'Generating image...' : 'Thinking...'}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* AI Text Response */}
+                  {(phase === 'typing-ai' || phase === 'complete') && (
+                    <div>
+                      <p className="text-gray-300 mb-3">
+                        {displayedAiText}
+                        {phase === 'typing-ai' && (
+                          <span className="inline-block w-0.5 h-4 bg-gray-400 ml-0.5 animate-pulse"></span>
+                        )}
+                      </p>
+
+                      {/* Image placeholder for image type */}
+                      {scenario.type === 'image' && phase === 'complete' && (
+                        <div className={`w-full sm:w-80 h-48 bg-gradient-to-br ${scenario.gradient} rounded-xl border border-white/10 flex items-center justify-center transform transition-all duration-500 animate-fade-in overflow-hidden relative`}>
+                          {/* Shimmer overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer"></div>
+                          <span className="text-gray-400 text-sm z-10">AI Generated Image</span>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="message-content text-gray-100 prose prose-invert prose-sm max-w-none">
-                            <ReactMarkdown>{message.content}</ReactMarkdown>
-                          </div>
-                          {/* Render image if present */}
-                          {message.isImage && message.imageUrl && (
-                            <div className="mt-4">
-                              <div className="relative inline-block rounded-xl overflow-hidden border border-gray-700 shadow-lg generated-image">
-                                <img
-                                  src={message.imageUrl}
-                                  alt={message.imagePrompt || 'Generated image'}
-                                  className="max-w-full sm:max-w-md lg:max-w-lg rounded-xl"
-                                  loading="lazy"
-                                  onError={(e) => {
-                                    e.target.style.display = 'none'
-                                    e.target.nextSibling.style.display = 'flex'
-                                  }}
-                                />
-                                <div className="hidden items-center justify-center w-64 h-64 bg-gray-800 text-gray-400 text-sm">
-                                  Failed to load image
-                                </div>
-                                <div className="absolute bottom-2 right-2 flex gap-2">
-                                  <a
-                                    href={message.imageUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="p-2 bg-black/70 hover:bg-black/90 rounded-lg transition-colors"
-                                    title="Open in new tab"
-                                  >
-                                    <Icons.Download />
-                                  </a>
-                                </div>
-                              </div>
-                              {message.model && (
-                                <p className="text-xs text-gray-500 mt-2">
-                                  Generated with {message.model}
-                                </p>
-                              )}
-                            </div>
-                          )}
-                          <div className="flex items-center gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => copyMessage(message.content, message.id)}
-                              className="flex items-center gap-1 px-2 py-1 text-xs text-gray-400 hover:text-white hover:bg-gray-800 rounded transition-colors"
-                            >
-                              {copiedId === message.id ? <Icons.Check /> : <Icons.Copy />}
-                              {copiedId === message.id ? 'Copied!' : 'Copy'}
-                            </button>
-                          </div>
-                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Image loading state */}
+                  {isImageLoading && (
+                    <div className="w-full sm:w-80 h-48 bg-[#2f2f2f] rounded-xl border border-white/10 flex items-center justify-center overflow-hidden relative">
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#2f2f2f] via-[#3f3f3f] to-[#2f2f2f] animate-shimmer"></div>
+                      <div className="flex items-center gap-2 z-10">
+                        <svg className="w-5 h-5 text-purple-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        <span className="text-gray-400 text-sm">Creating your image...</span>
                       </div>
                     </div>
                   )}
                 </div>
-              ))}
-
-              {/* Loading indicator */}
-              {isLoading && (
-                <div className="mb-6 animate-fade-in">
-                  <div className="flex items-start gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      mode === 'image'
-                        ? 'bg-gradient-to-br from-purple-500 to-pink-500'
-                        : 'bg-gradient-to-br from-[#10a37f] to-[#1a7f64]'
-                    }`}>
-                      {mode === 'image' ? <Icons.Image /> : <Icons.Sparkles />}
-                    </div>
-                    <div className="py-4">
-                      {mode === 'image' ? (
-                        <div className="flex items-center gap-3">
-                          <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-                          <span className="text-gray-400 text-sm">Creating your image...</span>
-                        </div>
-                      ) : (
-                        <div className="typing-indicator flex gap-1">
-                          <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
-                          <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
-                          <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div ref={messagesEndRef} />
-            </div>
-          )}
-        </div>
-
-        {/* Input Area */}
-        <div className="border-t border-gray-800 bg-[#212121] p-4">
-          <div className="max-w-3xl mx-auto">
-            <div
-              ref={inputContainerRef}
-              className="relative bg-[#2f2f2f] rounded-2xl border border-gray-700 focus-within:border-[#10a37f] transition-colors"
-            >
-              {/* Mode Selector Button */}
-              <div className="absolute left-2 bottom-2" ref={modeMenuRef}>
-                <button
-                  onClick={() => setModeMenuOpen(!modeMenuOpen)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm ${
-                    mode === 'image'
-                      ? 'bg-purple-500/20 text-purple-400 hover:bg-purple-500/30'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
-                >
-                  {mode === 'image' ? <Icons.Image /> : <Icons.Chat />}
-                  <span className="hidden sm:inline">{mode === 'image' ? 'Create Image' : 'Chat'}</span>
-                  <Icons.ChevronDown />
-                </button>
-
-                {/* Mode Dropdown Menu */}
-                {modeMenuOpen && (
-                  <div className="absolute bottom-full left-0 mb-2 w-56 bg-[#2f2f2f] rounded-xl border border-gray-700 shadow-xl overflow-hidden animate-fade-in z-50">
-                    <div className="p-1">
-                      <button
-                        onClick={() => selectMode('chat')}
-                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${
-                          mode === 'chat' ? 'bg-gray-700' : 'hover:bg-gray-700/50'
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#10a37f] to-[#1a7f64] flex items-center justify-center">
-                          <Icons.Chat />
-                        </div>
-                        <div>
-                          <div className="font-medium text-white">Chat</div>
-                          <div className="text-xs text-gray-400">Ask questions, get help</div>
-                        </div>
-                      </button>
-                      <button
-                        onClick={() => selectMode('image')}
-                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left ${
-                          mode === 'image' ? 'bg-gray-700' : 'hover:bg-gray-700/50'
-                        }`}
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                          <Icons.Image />
-                        </div>
-                        <div>
-                          <div className="font-medium text-white">Create Image</div>
-                          <div className="text-xs text-gray-400">Generate AI images</div>
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
-
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={mode === 'image' ? 'Describe the image you want to create...' : 'Message Your Personal AI Assistant...'}
-                className="w-full bg-transparent pl-40 sm:pl-44 pr-14 py-4 text-white placeholder-gray-500 resize-none focus:outline-none auto-resize-textarea"
-                rows={1}
-                disabled={isLoading}
-              />
-              <button
-                onClick={handleSend}
-                disabled={!input.trim() || isLoading}
-                className={`absolute right-2 bottom-2 p-2 rounded-lg transition-colors disabled:cursor-not-allowed ${
-                  mode === 'image'
-                    ? 'bg-purple-500 disabled:bg-gray-600 text-white disabled:text-gray-400'
-                    : 'bg-white disabled:bg-gray-600 text-black disabled:text-gray-400'
-                }`}
-              >
-                <Icons.Send />
-              </button>
-            </div>
-            <p className="text-xs text-gray-500 text-center mt-3">
-              {mode === 'image'
-                ? 'Describe your image and press Enter to generate'
-                : 'Press Enter to send, Shift + Enter for new line'
-              }
-            </p>
+            )}
           </div>
         </div>
-      </main>
+
+        {/* Scenario Selector */}
+        <div className="px-4 pb-4 flex items-center justify-center gap-2">
+          {demoScenarios.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => handleScenarioClick(index)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                index === currentScenario
+                  ? 'w-6 bg-[#10a37f]'
+                  : 'bg-gray-600 hover:bg-gray-500'
+              }`}
+              aria-label={`Demo scenario ${index + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Glow effect */}
+      <div className="absolute -inset-4 bg-gradient-to-r from-[#10a37f]/20 to-purple-500/20 rounded-3xl blur-xl -z-10"></div>
     </div>
   )
 }
 
-// Wrap with AuthGuard to protect the route
-export default function Home() {
+export default function LandingPage() {
+  const { user } = useAuth()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [openFaq, setOpenFaq] = useState(null)
+
   return (
-    <AuthGuard>
-      <HomeContent />
-    </AuthGuard>
+    <div className="min-h-screen bg-[#0a0a0a]">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#10a37f] to-[#1a7f64] flex items-center justify-center">
+                <Icons.Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-bold text-white">NexusAI</span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-8">
+              <a href="#features" className="text-gray-400 hover:text-white transition-colors">Features</a>
+              <a href="#pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</a>
+              <a href="#faq" className="text-gray-400 hover:text-white transition-colors">FAQ</a>
+            </div>
+
+            {/* Auth Buttons */}
+            <div className="hidden md:flex items-center gap-4">
+              {user ? (
+                <Link
+                  href="/dashboard"
+                  className="px-4 py-2 bg-gradient-to-r from-[#10a37f] to-[#1a7f64] text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
+                >
+                  Go to Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link href="/auth/login" className="text-gray-400 hover:text-white transition-colors">
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="px-4 py-2 bg-gradient-to-r from-[#10a37f] to-[#1a7f64] text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden p-2 text-gray-400 hover:text-white"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <Icons.Close /> : <Icons.Menu />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-[#0a0a0a] border-t border-white/5 animate-fade-in">
+            <div className="px-4 py-4 space-y-4">
+              <a href="#features" className="block text-gray-400 hover:text-white transition-colors" onClick={() => setMobileMenuOpen(false)}>Features</a>
+              <a href="#pricing" className="block text-gray-400 hover:text-white transition-colors" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
+              <a href="#faq" className="block text-gray-400 hover:text-white transition-colors" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
+              <div className="pt-4 border-t border-white/10 space-y-3">
+                {user ? (
+                  <Link
+                    href="/dashboard"
+                    className="block w-full px-4 py-2 bg-gradient-to-r from-[#10a37f] to-[#1a7f64] text-white rounded-lg font-medium text-center"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Go to Dashboard
+                  </Link>
+                ) : (
+                  <>
+                    <Link href="/auth/login" className="block text-gray-400 hover:text-white transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/auth/signup"
+                      className="block w-full px-4 py-2 bg-gradient-to-r from-[#10a37f] to-[#1a7f64] text-white rounded-lg font-medium text-center"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Get Started
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* Hero Section */}
+      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#10a37f]/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative">
+          <div className="text-center max-w-4xl mx-auto">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 animate-fade-in">
+              <span className="w-2 h-2 bg-[#10a37f] rounded-full animate-pulse"></span>
+              <span className="text-sm text-gray-400">Powered by cutting-edge AI</span>
+            </div>
+
+            {/* Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 animate-fade-in leading-tight">
+              Your AI-Powered
+              <span className="block bg-gradient-to-r from-[#10a37f] via-emerald-400 to-teal-300 bg-clip-text text-transparent">
+                Creative Assistant
+              </span>
+            </h1>
+
+            {/* Subheadline */}
+            <p className="text-lg sm:text-xl text-gray-400 mb-10 max-w-2xl mx-auto animate-fade-in">
+              Chat, create images, write code, and accomplish more with the most advanced AI assistant.
+              Pay only for what you use.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in">
+              <Link
+                href={user ? "/dashboard" : "/auth/signup"}
+                className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#10a37f] to-[#1a7f64] text-white rounded-xl font-semibold text-lg hover:opacity-90 transition-all flex items-center justify-center gap-2"
+              >
+                {user ? "Go to Dashboard" : "Start Free Today"}
+                <Icons.ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <a
+                href="#pricing"
+                className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 text-white rounded-xl font-semibold text-lg hover:bg-white/10 transition-colors text-center"
+              >
+                View Pricing
+              </a>
+            </div>
+
+            {/* Social Proof */}
+            <div className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-8 text-gray-500 animate-fade-in">
+              <div className="flex items-center gap-2">
+                <Icons.Users className="w-5 h-5" />
+                <span>10,000+ users</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Icons.Chat className="w-5 h-5" />
+                <span>1M+ conversations</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Icons.TrendingUp className="w-5 h-5" />
+                <span>99.9% uptime</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive Demo */}
+          <InteractiveDemo />
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-[#0f0f0f]">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Everything you need to create
+            </h2>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+              Powerful AI tools designed to boost your productivity and creativity
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className="group p-6 bg-[#1a1a1a] rounded-2xl border border-white/5 hover:border-[#10a37f]/50 transition-all duration-300"
+              >
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#10a37f]/20 to-[#10a37f]/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <feature.icon className="w-6 h-6 text-[#10a37f]" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
+                <p className="text-gray-400">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Simple, transparent pricing
+            </h2>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+              Start free, scale as you grow. Only pay for what you use beyond your plan limits.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {pricingPlans.map((plan, index) => (
+              <div
+                key={index}
+                className={`relative p-8 rounded-2xl border transition-all duration-300 ${
+                  plan.highlight
+                    ? 'bg-gradient-to-b from-[#10a37f]/10 to-transparent border-[#10a37f]/50 scale-105 lg:scale-110 shadow-xl shadow-[#10a37f]/10'
+                    : 'bg-[#1a1a1a] border-white/5 hover:border-white/20'
+                }`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-[#10a37f] to-emerald-400 rounded-full text-sm font-medium text-white">
+                    Most Popular
+                  </div>
+                )}
+
+                <div className="text-center mb-8">
+                  <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
+                  <p className="text-gray-400 text-sm mb-6">{plan.description}</p>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className="text-5xl font-bold text-white">{plan.priceLabel}</span>
+                    {plan.period && <span className="text-gray-400">{plan.period}</span>}
+                  </div>
+                </div>
+
+                <ul className="space-y-4 mb-8">
+                  {plan.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-start gap-3">
+                      <Icons.Check className="w-5 h-5 text-[#10a37f] flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-300">{feature}</span>
+                    </li>
+                  ))}
+                  {plan.usageRates && (
+                    <li className="pl-8 space-y-2">
+                      {plan.usageRates.map((rate, rateIndex) => (
+                        <div key={rateIndex} className="flex justify-between text-sm">
+                          <span className="text-gray-500">{rate.label}</span>
+                          <span className="text-[#10a37f] font-mono">{rate.rate}</span>
+                        </div>
+                      ))}
+                    </li>
+                  )}
+                </ul>
+
+              </div>
+            ))}
+          </div>
+
+          {/* Usage Note */}
+          <div className="mt-12 text-center">
+            <p className="text-gray-500 text-sm">
+              All plans include a 14-day free trial. No credit card required to start.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8 bg-[#0f0f0f]">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Frequently asked questions
+            </h2>
+            <p className="text-gray-400 text-lg">
+              Everything you need to know about NexusAI
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <div
+                key={index}
+                className="border border-white/5 rounded-xl overflow-hidden"
+              >
+                <button
+                  className="w-full px-6 py-4 flex items-center justify-between text-left bg-[#1a1a1a] hover:bg-[#1f1f1f] transition-colors"
+                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                >
+                  <span className="font-medium text-white">{faq.question}</span>
+                  <svg
+                    className={`w-5 h-5 text-gray-400 transition-transform ${openFaq === index ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {openFaq === index && (
+                  <div className="px-6 py-4 bg-[#151515] text-gray-400 animate-fade-in">
+                    {faq.answer}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="p-12 rounded-3xl bg-gradient-to-br from-[#10a37f]/20 via-[#1a1a1a] to-purple-500/10 border border-white/10 relative overflow-hidden">
+            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+            <div className="relative">
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+                Ready to supercharge your workflow?
+              </h2>
+              <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+                Join thousands of professionals using NexusAI to create, code, and communicate better.
+              </p>
+              <Link
+                href={user ? "/dashboard" : "/auth/signup"}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#10a37f] to-emerald-400 text-white rounded-xl font-semibold text-lg hover:opacity-90 transition-opacity"
+              >
+                {user ? "Go to Dashboard" : "Get Started Free"}
+                <Icons.ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-white/5">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#10a37f] to-[#1a7f64] flex items-center justify-center">
+                <Icons.Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-lg font-bold text-white">NexusAI</span>
+            </div>
+            <div className="flex items-center gap-8 text-gray-500 text-sm">
+              <a href="#" className="hover:text-white transition-colors">Privacy</a>
+              <a href="#" className="hover:text-white transition-colors">Terms</a>
+              <a href="#" className="hover:text-white transition-colors">Contact</a>
+            </div>
+            <p className="text-gray-500 text-sm">
+              &copy; {new Date().getFullYear()} NexusAI. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
   )
 }

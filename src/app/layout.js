@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Your Personal AI Assistant",
-  description: "Chat with your personal AI assistant for help with writing, coding, analysis, and more.",
+  title: "NexusAI - Your AI-Powered Creative Assistant",
+  description: "Chat, create images, write code, and accomplish more with NexusAI. Pay only for what you use with usage-based pricing.",
 };
 
 export default function RootLayout({ children }) {

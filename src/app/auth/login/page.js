@@ -57,7 +57,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.push('/');
+      router.push('/dashboard');
     }
   }, [user, loading, router]);
 
@@ -79,7 +79,7 @@ export default function LoginPage() {
       setFormError(error.message);
       setIsLoading(false);
     } else {
-      router.push('/');
+      router.push('/dashboard');
     }
   };
 
@@ -104,7 +104,7 @@ export default function LoginPage() {
         <div className="relative z-10">
           <div className="flex items-center gap-3 text-white">
             <SparklesIcon />
-            <span className="text-2xl font-semibold">AI Assistant</span>
+            <span className="text-2xl font-semibold">NexusAI</span>
           </div>
         </div>
 
@@ -139,7 +139,7 @@ export default function LoginPage() {
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center gap-3 text-[#10a37f] mb-2">
             <SparklesIcon />
-            <span className="text-2xl font-semibold text-white">AI Assistant</span>
+            <span className="text-2xl font-semibold text-white">NexusAI</span>
           </div>
 
           <div className="text-center">
